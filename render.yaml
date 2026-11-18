@@ -1,0 +1,12 @@
+# Render.com auto-configuration - keeps hosting setup to 2 clicks
+services:
+  - type: web
+    name: gitinsight-ai
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --workers 2 --timeout 120
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GITHUB_TOKEN
+        sync: false

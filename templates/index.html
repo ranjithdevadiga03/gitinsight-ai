@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GitInsight AI - GitHub Repository Analyzer</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+  <!-- Marked.js renders the Markdown returned by Gemini -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+
+  <!-- ================= Navigation Bar ================= -->
+  <nav class="navbar">
+    <div class="brand">
+      <span class="logo-icon">&#128736;</span>
+      <span>GitInsight <b>AI</b></span>
+    </div>
+    <ul class="nav-links">
+      <li><a href="#repo-input">Analyze</a></li>
+      <li><a href="#overview">Overview</a></li>
+      <li><a href="#structure">Structure</a></li>
+      <li><a href="#explain">Code Explanation</a></li>
+      <li><a href="#chatbot">Chatbot</a></li>
+    </ul>
+  </nav>
+
+  <!-- ================= Hero / Repository Input ================= -->
+  <header class="hero" id="repo-input">
+    <h1>Generative AI-Based GitHub Repository Analysis</h1>
+    <p class="subtitle">
+      Enter any <b>public</b> GitHub repository URL and let Google Gemini explain
+      its structure, code, functionality and architecture in simple English.
+    </p>
+
+    <div class="input-box">
+      <input
+        type="text"
+        id="repoUrl"
+        placeholder="https://github.com/owner/repository"
+        autocomplete="off"
+      />
+      <button id="analyzeBtn">Analyze Repository</button>
+    </div>
+
+    <p class="hint">
+      Example:
+      <a href="#" id="sampleUrl">https://github.com/pallets/flask</a>
+    </p>
+
+    <!-- Error message area -->
+    <div id="errorBox" class="error-box hidden"></div>
+
+    <!-- Loader -->
+    <div id="loader" class="loader hidden">
+      <div class="spinner"></div>
+      <span>Analyzing repository with Gemini... this can take ~20 seconds</span>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- ================= Repository Information ================= -->
+    <section id="repo-info" class="card hidden">
+      <h2>Repository Information</h2>
+      <div class="repo-meta">
+        <div class="meta-item"><span class="meta-label">Name</span><span id="repoName">-</span></div>
+        <div class="meta-item"><span class="meta-label">Owner</span><span id="repoOwner">-</span></div>
+        <div class="meta-item"><span class="meta-label">Language</span><span id="repoLanguage">-</span></div>
+        <div class="meta-item"><span class="meta-label">Branch</span><span id="repoBranch">-</span></div>
+        <div class="meta-item"><span class="meta-label">Stars</span><span id="repoStars">-</span></div>
+        <div class="meta-item"><span class="meta-label">Forks</span><span id="repoForks">-</span></div>
+      </div>
+      <p id="repoDescription" class="repo-desc"></p>
+      <div id="languageBars" class="language-bars"></div>
+    </section>
+
+    <!-- ================= Project Overview (AI) ================= -->
+    <section id="overview" class="card hidden">
+      <h2>Project Overview</h2>
+      <div id="analysisOutput" class="markdown"></div>
+    </section>
+
+    <!-- ================= File Structure ================= -->
+    <section id="structure" class="card hidden">
+      <h2>File Structure</h2>
+      <div class="structure-actions">
+        <input type="text" id="fileFilter" placeholder="Filter files... e.g. .py or src/" />
+      </div>
+      <ul id="treeList" class="tree-list"></ul>
+      <p id="filesAnalyzed" class="files-analyzed"></p>
+    </section>
+
+    <!-- ================= Code Explanation ================= -->
+    <section id="explain" class="card hidden">
+      <h2>AI Code Explanation</h2>
+      <div class="explain-controls">
+        <select id="fileSelect">
+          <option value="">-- select a analyzed file --</option>
+        </select>
+        <input type="text" id="customFile" placeholder="...or type a file path, e.g. app.py" />
+        <button id="explainBtn">Explain File</button>
+      </div>
+      <div id="explainLoader" class="loader hidden">
+        <div class="spinner"></div><span>Explaining with Gemini...</span>
+      </div>
+      <div id="explainOutput" class="markdown"></div>
+    </section>
+
+    <!-- ================= AI Chatbot ================= -->
+    <section id="chatbot" class="card hidden">
+      <h2>AI Chatbot</h2>
+      <p class="chat-hint">Ask anything about the analyzed repository, for example:</p>
+      <div class="suggestions">
+        <button class="chip">What is the purpose of this project?</button>
+        <button class="chip">Which programming language is used?</button>
+        <button class="chip">How does the application work?</button>
+        <button class="chip">What are the main functions?</button>
+      </div>
+
+      <div id="chatWindow" class="chat-window">
+        <div class="msg bot">Hi! Analyze a repository first, then ask me anything about it.</div>
+      </div>
+
+      <div class="chat-input">
+        <input type="text" id="chatInput" placeholder="Type your question..." />
+        <button id="sendBtn">Send</button>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    Built with Flask + Google Gemini + GitHub API &middot; Mini Project
+  </footer>
+
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

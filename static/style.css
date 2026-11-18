@@ -1,0 +1,474 @@
+/* ===========================================================
+   GitInsight AI - White & Light-Blue professional theme
+   =========================================================== */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --blue: #2f7cf6;
+  --blue-dark: #1c5ed0;
+  --blue-light: #eaf3ff;
+  --blue-border: #cfe2ff;
+  --text: #1f2937;
+  --muted: #6b7280;
+  --white: #ffffff;
+  --radius: 12px;
+  --shadow: 0 4px 14px rgba(47, 124, 246, 0.10);
+}
+
+body {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background: #f6faff;
+  color: var(--text);
+  line-height: 1.6;
+}
+
+/* ---------------- Navbar ---------------- */
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 40px;
+  background: var(--white);
+  border-bottom: 1px solid var(--blue-border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.brand {
+  font-size: 20px;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.brand b { color: var(--blue); }
+
+.logo-icon { font-size: 22px; }
+
+.nav-links {
+  display: flex;
+  gap: 26px;
+  list-style: none;
+}
+
+.nav-links a {
+  text-decoration: none;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.nav-links a:hover { color: var(--blue); }
+
+/* ---------------- Hero ---------------- */
+.hero {
+  text-align: center;
+  padding: 60px 20px 45px;
+  background: linear-gradient(180deg, #ffffff 0%, var(--blue-light) 100%);
+  border-bottom: 1px solid var(--blue-border);
+}
+
+.hero h1 {
+  font-size: 30px;
+  color: #12315e;
+  margin-bottom: 10px;
+}
+
+.subtitle {
+  color: var(--muted);
+  max-width: 640px;
+  margin: 0 auto 26px;
+  font-size: 15px;
+}
+
+.input-box {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  max-width: 640px;
+  margin: 0 auto;
+  flex-wrap: wrap;
+}
+
+.input-box input {
+  flex: 1;
+  min-width: 280px;
+  padding: 13px 16px;
+  border: 1.5px solid var(--blue-border);
+  border-radius: var(--radius);
+  font-size: 15px;
+  outline: none;
+  background: #fff;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.input-box input:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 4px rgba(47, 124, 246, 0.15);
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  border-radius: var(--radius);
+  font-size: 15px;
+  font-weight: 600;
+  transition: background 0.2s, transform 0.1s;
+}
+
+button:active { transform: scale(0.98); }
+
+#analyzeBtn,
+#explainBtn,
+#sendBtn {
+  background: var(--blue);
+  color: #fff;
+  padding: 13px 26px;
+}
+
+#analyzeBtn:hover,
+#explainBtn:hover,
+#sendBtn:hover { background: var(--blue-dark); }
+
+button:disabled {
+  background: #a9c4f0 !important;
+  cursor: not-allowed;
+}
+
+.hint {
+  margin-top: 14px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.hint a { color: var(--blue); text-decoration: none; }
+
+/* ---------------- Loader / Error ---------------- */
+.loader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 24px;
+  color: var(--blue-dark);
+  font-size: 14px;
+}
+
+.spinner {
+  width: 22px;
+  height: 22px;
+  border: 3px solid var(--blue-border);
+  border-top-color: var(--blue);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.error-box {
+  max-width: 640px;
+  margin: 20px auto 0;
+  background: #fdecec;
+  border: 1px solid #f5c2c2;
+  color: #b3261e;
+  padding: 12px 16px;
+  border-radius: var(--radius);
+  font-size: 14px;
+}
+
+.hidden { display: none !important; }
+
+/* ---------------- Layout / Cards ---------------- */
+.container {
+  max-width: 960px;
+  margin: 34px auto;
+  padding: 0 20px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+}
+
+.card {
+  background: var(--white);
+  border: 1px solid var(--blue-border);
+  border-radius: var(--radius);
+  padding: 26px 28px;
+  box-shadow: var(--shadow);
+}
+
+.card h2 {
+  font-size: 19px;
+  color: #12315e;
+  margin-bottom: 18px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--blue-light);
+}
+
+/* ---------------- Repository info ---------------- */
+.repo-meta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.meta-item {
+  background: var(--blue-light);
+  border-radius: 10px;
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+}
+
+.meta-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--muted);
+}
+
+.meta-item span:last-child {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--blue-dark);
+  word-break: break-all;
+}
+
+.repo-desc { color: var(--muted); font-size: 14px; margin-bottom: 16px; }
+
+.language-bars { display: flex; flex-direction: column; gap: 8px; }
+
+.lang-row {
+  display: grid;
+  grid-template-columns: 110px 1fr 55px;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+}
+
+.lang-bar {
+  height: 8px;
+  background: var(--blue-light);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.lang-bar span {
+  display: block;
+  height: 100%;
+  background: var(--blue);
+  border-radius: 6px;
+}
+
+/* ---------------- Markdown output ---------------- */
+.markdown {
+  font-size: 15px;
+  color: var(--text);
+  overflow-wrap: break-word;
+}
+
+.markdown h2 {
+  font-size: 17px;
+  color: var(--blue-dark);
+  margin: 20px 0 8px;
+  border: none;
+  padding: 0;
+}
+
+.markdown h2:first-child { margin-top: 0; }
+
+.markdown h3 { font-size: 15px; margin: 14px 0 6px; color: #12315e; }
+.markdown p { margin: 8px 0; }
+.markdown ul, .markdown ol { margin: 8px 0 8px 22px; }
+.markdown li { margin: 4px 0; }
+.markdown code {
+  background: var(--blue-light);
+  padding: 2px 6px;
+  border-radius: 5px;
+  font-size: 13px;
+  color: var(--blue-dark);
+}
+.markdown pre {
+  background: #0f172a;
+  color: #e2e8f0;
+  padding: 14px;
+  border-radius: 10px;
+  overflow-x: auto;
+  margin: 10px 0;
+}
+.markdown pre code { background: none; color: inherit; padding: 0; }
+.markdown table { border-collapse: collapse; width: 100%; margin: 10px 0; }
+.markdown th, .markdown td { border: 1px solid var(--blue-border); padding: 7px 10px; font-size: 14px; }
+.markdown th { background: var(--blue-light); }
+
+/* ---------------- File structure ---------------- */
+.structure-actions { margin-bottom: 14px; }
+
+#fileFilter {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.5px solid var(--blue-border);
+  border-radius: 10px;
+  font-size: 14px;
+  outline: none;
+}
+
+#fileFilter:focus { border-color: var(--blue); }
+
+.tree-list {
+  list-style: none;
+  max-height: 330px;
+  overflow-y: auto;
+  border: 1px solid var(--blue-border);
+  border-radius: 10px;
+  padding: 8px;
+}
+
+.tree-list li {
+  padding: 7px 10px;
+  font-family: Consolas, monospace;
+  font-size: 13px;
+  border-radius: 6px;
+  color: #334155;
+  cursor: default;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tree-list li:hover { background: var(--blue-light); }
+.tree-list li.dir { color: var(--blue-dark); font-weight: 600; }
+.tree-list li button {
+  margin-left: auto;
+  background: var(--blue-light);
+  color: var(--blue-dark);
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 6px;
+}
+.tree-list li button:hover { background: var(--blue); color: #fff; }
+
+.files-analyzed {
+  margin-top: 12px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+/* ---------------- Code explanation ---------------- */
+.explain-controls {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.explain-controls select,
+.explain-controls input {
+  flex: 1;
+  min-width: 180px;
+  padding: 11px 13px;
+  border: 1.5px solid var(--blue-border);
+  border-radius: 10px;
+  font-size: 14px;
+  outline: none;
+  background: #fff;
+}
+
+.explain-controls select:focus,
+.explain-controls input:focus { border-color: var(--blue); }
+
+/* ---------------- Chatbot ---------------- */
+.chat-hint { font-size: 13px; color: var(--muted); margin-bottom: 8px; }
+
+.suggestions { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+
+.chip {
+  background: var(--blue-light);
+  color: var(--blue-dark);
+  border: 1px solid var(--blue-border);
+  font-size: 12.5px;
+  font-weight: 500;
+  padding: 7px 13px;
+  border-radius: 999px;
+}
+
+.chip:hover { background: var(--blue); color: #fff; }
+
+.chat-window {
+  height: 300px;
+  overflow-y: auto;
+  background: #f8fbff;
+  border: 1px solid var(--blue-border);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.msg {
+  max-width: 80%;
+  padding: 10px 14px;
+  border-radius: 14px;
+  font-size: 14px;
+  overflow-wrap: break-word;
+}
+
+.msg.user {
+  align-self: flex-end;
+  background: var(--blue);
+  color: #fff;
+  border-bottom-right-radius: 4px;
+}
+
+.msg.bot {
+  align-self: flex-start;
+  background: #fff;
+  border: 1px solid var(--blue-border);
+  color: var(--text);
+  border-bottom-left-radius: 4px;
+}
+
+.msg.bot p { margin: 4px 0; }
+.msg.bot ul, .msg.bot ol { margin: 6px 0 6px 20px; }
+.msg.bot code { background: var(--blue-light); padding: 1px 5px; border-radius: 4px; font-size: 13px; }
+
+.chat-input { display: flex; gap: 10px; }
+
+.chat-input input {
+  flex: 1;
+  padding: 12px 15px;
+  border: 1.5px solid var(--blue-border);
+  border-radius: 10px;
+  font-size: 14px;
+  outline: none;
+}
+
+.chat-input input:focus { border-color: var(--blue); }
+
+/* ---------------- Footer ---------------- */
+.footer {
+  text-align: center;
+  padding: 22px;
+  font-size: 13px;
+  color: var(--muted);
+  background: var(--white);
+  border-top: 1px solid var(--blue-border);
+}
+
+/* ---------------- Responsive ---------------- */
+@media (max-width: 720px) {
+  .navbar { padding: 12px 16px; flex-direction: column; gap: 10px; }
+  .nav-links { gap: 16px; flex-wrap: wrap; justify-content: center; }
+  .hero h1 { font-size: 23px; }
+  .lang-row { grid-template-columns: 80px 1fr 45px; }
+}
