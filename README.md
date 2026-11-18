@@ -4,6 +4,10 @@ A beginner-friendly web application that analyzes any **public GitHub repository
 using **Google Gemini** and explains its structure, source code, functionalities
 and architecture in simple English.
 
+## Live Demo
+
+**https://gitinsight-ai-ke93.onrender.com/**
+
 ## Features
 
 1. **GitHub Repository Input** – enter a repo URL, validate it, click *Analyze*.
