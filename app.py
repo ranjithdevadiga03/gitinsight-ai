@@ -12,6 +12,7 @@ Features:
 
 import os
 import re
+import sys
 import time
 import base64
 
@@ -37,7 +38,7 @@ GITHUB_API = "https://api.github.com"
 # Limits so that large repositories do not blow up the prompt / cost
 MAX_FILES_FOR_ANALYSIS = 15        # max source files sent for repository analysis
 MAX_FILE_SIZE_BYTES = 50_000       # skip files bigger than ~50 KB
-MAX_TOTAL_CHARS = 40_000           # total characters of code sent to Gemini
+MAX_TOTAL_CHARS = 25_000           # total characters of code sent to Gemini
 
 # File extensions we consider "source code"
 SOURCE_EXTENSIONS = (
@@ -242,7 +243,7 @@ GEMINI_MODELS = [
 # Hard cap for one AI request so we always finish before the host/gunicorn
 # timeout. If we exceed it we raise a clean, JSON-friendly error instead of
 # letting the worker get killed (which returns an HTML error page).
-AI_DEADLINE_SECONDS = 85
+AI_DEADLINE_SECONDS = 75
 
 
 def generate_ai(contents, system_instruction="", temperature=0.3, max_output_tokens=2048):
@@ -488,6 +489,35 @@ def chat():
         return jsonify({"error": str(exc)}), 400
     except Exception as exc:
         return jsonify({"error": f"AI request failed: {exc}"}), 500
+
+
+# ---------------------------------------------------------------------------
+# Diagnostics (safe: never returns HTML, always JSON)
+# ---------------------------------------------------------------------------
+
+@app.route("/api/_diag", methods=["GET", "POST"])
+def diag():
+    info = {
+        "python": sys.version.split()[0],
+        "key_set": bool(GEMINI_API_KEY),
+        "models": GEMINI_MODELS,
+    }
+    try:
+        if genai_client is None:
+            info["genai"] = "no client"
+        else:
+            t0 = time.time()
+            resp = genai_client.models.generate_content(
+                model=GEMINI_MODELS[0],
+                contents="Reply with the single word: ok",
+                config=types.GenerateContentConfig(max_output_tokens=10),
+            )
+            info["genai"] = (resp.text or "").strip()[:50]
+            info["genai_seconds"] = round(time.time() - t0, 1)
+    except BaseException as exc:  # noqa: BLE001 - diagnostics only
+        info["genai_error_type"] = type(exc).__name__
+        info["genai_error"] = str(exc)[:300]
+    return jsonify(info)
 
 
 # ---------------------------------------------------------------------------
