@@ -17,6 +17,7 @@ import base64
 
 import requests
 from flask import Flask, jsonify, render_template, request
+from werkzeug.exceptions import HTTPException
 from dotenv import load_dotenv
 from google import genai
 from google.genai import types
@@ -36,7 +37,7 @@ GITHUB_API = "https://api.github.com"
 # Limits so that large repositories do not blow up the prompt / cost
 MAX_FILES_FOR_ANALYSIS = 15        # max source files sent for repository analysis
 MAX_FILE_SIZE_BYTES = 50_000       # skip files bigger than ~50 KB
-MAX_TOTAL_CHARS = 60_000           # total characters of code sent to Gemini
+MAX_TOTAL_CHARS = 40_000           # total characters of code sent to Gemini
 
 # File extensions we consider "source code"
 SOURCE_EXTENSIONS = (
@@ -49,6 +50,24 @@ app = Flask(__name__)
 
 # Initialize the Gemini client once at startup
 genai_client = genai.Client(api_key=GEMINI_API_KEY) if GEMINI_API_KEY else None
+
+
+# ---------------------------------------------------------------------------
+# Error handling: always return JSON for /api/* (never an HTML error page)
+# ---------------------------------------------------------------------------
+
+@app.errorhandler(HTTPException)
+def handle_http_error(err):
+    if request.path.startswith("/api/"):
+        return jsonify({"error": err.description or err.name}), err.code
+    return err
+
+
+@app.errorhandler(Exception)
+def handle_unexpected_error(err):
+    if request.path.startswith("/api/"):
+        return jsonify({"error": f"Unexpected server error: {err}"}), 500
+    return "Internal Server Error", 500
 
 
 # ---------------------------------------------------------------------------
@@ -210,15 +229,20 @@ def build_code_bundle(owner, repo, files, branch):
 # ---------------------------------------------------------------------------
 
 # Try several models in order; some may be at high demand (503), retired (404)
-# or out of free-tier daily quota (429).
+# or out of free-tier daily quota (429). Fast models are tried first.
 GEMINI_MODELS = [
     "gemini-3.1-flash-lite",
-    "gemini-3.8-flash",
-    "gemini-3.7-flash",
-    "gemini-3.6-flash",
     "gemini-3.5-flash",
-    "gemini-3.1-pro-preview",
+    "gemini-3.6-flash",
+    "gemini-3.7-flash",
+    "gemini-3.8-flash",
+    "gemini-2.5-flash",
 ]
+
+# Hard cap for one AI request so we always finish before the host/gunicorn
+# timeout. If we exceed it we raise a clean, JSON-friendly error instead of
+# letting the worker get killed (which returns an HTML error page).
+AI_DEADLINE_SECONDS = 85
 
 
 def generate_ai(contents, system_instruction="", temperature=0.3, max_output_tokens=2048):
@@ -229,10 +253,13 @@ def generate_ai(contents, system_instruction="", temperature=0.3, max_output_tok
     if genai_client is None:
         raise ValueError("GEMINI_API_KEY is not set. Add it to the .env file.")
 
+    deadline = time.time() + AI_DEADLINE_SECONDS
     last_error = None
-    errors = []
+    detail = ""
     for model in GEMINI_MODELS:
-        for attempt in range(4):
+        for attempt in range(2):
+            if time.time() > deadline:
+                break
             try:
                 response = genai_client.models.generate_content(
                     model=model,
@@ -247,23 +274,25 @@ def generate_ai(contents, system_instruction="", temperature=0.3, max_output_tok
             except Exception as exc:  # depends on network / demand / key
                 last_error = exc
                 message = str(exc)
-                if not errors:
-                    errors.append(f"{model}: {message[:150]}")
+                if not detail:
+                    detail = f"{model}: {message[:200]}"
                 # Daily quota exhausted for this model - move to the next one
                 if "429" in message or "RESOURCE_EXHAUSTED" in message:
                     break
-                # Temporary errors (503 demand, 404 retired model) - short retry
+                # Temporary errors (503 demand, 404 retired model) - tiny retry
                 if ("503" in message or "404" in message
                         or "UNAVAILABLE" in message or "NOT_FOUND" in message):
-                    time.sleep(1.5 * (attempt + 1))
+                    time.sleep(1)
                     continue
                 break  # permanent error (bad key, bad request...) - stop trying
+        if time.time() > deadline:
+            break
     # Friendly summary instead of a long raw API error
-    detail = errors[0] if errors else str(last_error)
     raise ValueError(
         "All AI models are busy or out of quota right now. "
         "Please try again in a few minutes. (Details: "
-        f"{detail[:200]})"
+        f"{detail or str(last_error)}"
+        ")"
     )
 
 

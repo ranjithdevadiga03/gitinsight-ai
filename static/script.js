@@ -56,6 +56,29 @@ function md(text) {
   return String(text || "").replace(/\n/g, "<br>");
 }
 
+// Safely turn a fetch Response into JSON. Hosting platforms/proxies can return
+// an HTML error page (e.g. a 500/502 after a timeout). Calling res.json()
+// directly on that HTML throws the cryptic "Unexpected token '<'" error, so
+// we read the text first and give a clear message instead.
+async function readJson(res) {
+  const text = await res.text();
+  let data = {};
+  if (text) {
+    try {
+      data = JSON.parse(text);
+    } catch (_) {
+      throw new Error(
+        "The server did not return a valid response (HTTP " + res.status + "). " +
+        "It may have timed out or restarted - please try again."
+      );
+    }
+  }
+  if (!res.ok) {
+    throw new Error(data.error || ("Request failed (HTTP " + res.status + ")."));
+  }
+  return data;
+}
+
 // Extract owner/repo from whatever the user typed
 function extractOwnerRepo(value) {
   const v = value.trim().replace(/\.git$/, "").replace(/\/$/, "");
@@ -90,11 +113,7 @@ async function analyzeRepository() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ url }),
     });
-    const data = await res.json();
-
-    if (!res.ok) {
-      throw new Error(data.error || "Analysis failed.");
-    }
+    const data = await readJson(res);
 
     renderRepoInfo(data.repo, data.languages);
     renderAnalysis(data.analysis);
@@ -232,8 +251,7 @@ async function explainFile() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ url, file }),
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || "Explanation failed.");
+    const data = await readJson(res);
     explainOutput.innerHTML = md(data.explanation);
     explainOutput.scrollIntoView({ behavior: "smooth", block: "start" });
   } catch (err) {
@@ -278,8 +296,7 @@ async function sendChat() {
         history: chatHistory.slice(0, -1), // exclude the just-added message
       }),
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || "Chat failed.");
+    const data = await readJson(res);
 
     pending.innerHTML = md(data.answer);
     chatHistory.push({ role: "assistant", content: data.answer });

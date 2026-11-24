@@ -22,7 +22,7 @@ and architecture in simple English.
 |---|---|
 | Frontend | HTML, CSS, JavaScript |
 | Backend | Python Flask |
-| Generative AI | Google Gemini API (`gemini-2.0-flash`) |
+| Generative AI | Google Gemini API (auto model fallback) |
 | Repository Data | GitHub REST API |
 
 No database, no React/Node.js.
