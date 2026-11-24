@@ -12,7 +12,6 @@ Features:
 
 import os
 import re
-import sys
 import time
 import base64
 
@@ -489,35 +488,6 @@ def chat():
         return jsonify({"error": str(exc)}), 400
     except Exception as exc:
         return jsonify({"error": f"AI request failed: {exc}"}), 500
-
-
-# ---------------------------------------------------------------------------
-# Diagnostics (safe: never returns HTML, always JSON)
-# ---------------------------------------------------------------------------
-
-@app.route("/api/_diag", methods=["GET", "POST"])
-def diag():
-    info = {
-        "python": sys.version.split()[0],
-        "key_set": bool(GEMINI_API_KEY),
-        "models": GEMINI_MODELS,
-    }
-    try:
-        if genai_client is None:
-            info["genai"] = "no client"
-        else:
-            t0 = time.time()
-            resp = genai_client.models.generate_content(
-                model=GEMINI_MODELS[0],
-                contents="Reply with the single word: ok",
-                config=types.GenerateContentConfig(max_output_tokens=10),
-            )
-            info["genai"] = (resp.text or "").strip()[:50]
-            info["genai_seconds"] = round(time.time() - t0, 1)
-    except BaseException as exc:  # noqa: BLE001 - diagnostics only
-        info["genai_error_type"] = type(exc).__name__
-        info["genai_error"] = str(exc)[:300]
-    return jsonify(info)
 
 
 # ---------------------------------------------------------------------------
