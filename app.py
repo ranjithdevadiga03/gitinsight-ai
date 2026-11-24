@@ -231,18 +231,20 @@ def build_code_bundle(owner, repo, files, branch):
 # Try several models in order; some may be at high demand (503), retired (404)
 # or out of free-tier daily quota (429). Fast models are tried first.
 GEMINI_MODELS = [
+    "gemini-2.5-flash-lite",
     "gemini-3.1-flash-lite",
+    "gemini-3.5-flash-lite",
     "gemini-3.5-flash",
+    "gemini-2.5-flash",
     "gemini-3.6-flash",
     "gemini-3.7-flash",
     "gemini-3.8-flash",
-    "gemini-2.5-flash",
 ]
 
 # Hard cap for one AI request so we always finish before the host/gunicorn
 # timeout. If we exceed it we raise a clean, JSON-friendly error instead of
 # letting the worker get killed (which returns an HTML error page).
-AI_DEADLINE_SECONDS = 75
+AI_DEADLINE_SECONDS = 45
 
 
 def generate_ai(contents, system_instruction="", temperature=0.3, max_output_tokens=2048):
@@ -257,7 +259,7 @@ def generate_ai(contents, system_instruction="", temperature=0.3, max_output_tok
     last_error = None
     detail = ""
     for model in GEMINI_MODELS:
-        for attempt in range(2):
+        for attempt in range(3):
             if time.time() > deadline:
                 break
             try:
@@ -365,11 +367,33 @@ Write a clear, beginner-friendly analysis in Markdown with EXACTLY these section
 ## Key Dependencies
 ## Possible Improvements
 """
-        analysis = generate_ai(
-            prompt,
-            system_instruction="You explain code simply for beginners. Use short sentences and Markdown.",
-            max_output_tokens=1200,
-        )
+        try:
+            analysis = generate_ai(
+                prompt,
+                system_instruction="You explain code simply for beginners. Use short sentences and Markdown.",
+                max_output_tokens=1200,
+            )
+        except ValueError as exc:
+            # Never fail the whole request just because Gemini is busy.
+            # Return the GitHub data with a helpful fallback summary instead.
+            lang_list = ", ".join(
+                f"{name} ({size} bytes)" for name, size in (languages or {}).items()
+            ) or "unknown"
+            top_files = "\n".join(f"- `{p}`" for p in included) or "- (none fetched)"
+            analysis = (
+                "## AI analysis temporarily unavailable\n\n"
+                "Gemini is busy right now (high demand), so the full AI summary "
+                "could not be generated. The repository details, languages and "
+                "file structure below are still accurate.\n\n"
+                "## Project Overview\n"
+                f"**{info.get('full_name')}** - "
+                f"{info.get('description') or 'No description provided.'}\n\n"
+                "## Programming Languages\n"
+                f"{lang_list}\n\n"
+                "## Selected Files\n"
+                f"{top_files}\n\n"
+                "Click **Analyze** again in a few minutes to get the full AI analysis."
+            )
 
         return jsonify({
             "repo": {
