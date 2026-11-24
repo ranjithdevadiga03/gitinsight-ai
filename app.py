@@ -37,7 +37,7 @@ GITHUB_API = "https://api.github.com"
 # Limits so that large repositories do not blow up the prompt / cost
 MAX_FILES_FOR_ANALYSIS = 15        # max source files sent for repository analysis
 MAX_FILE_SIZE_BYTES = 50_000       # skip files bigger than ~50 KB
-MAX_TOTAL_CHARS = 25_000           # total characters of code sent to Gemini
+MAX_TOTAL_CHARS = 15_000           # total characters of code sent to Gemini
 
 # File extensions we consider "source code"
 SOURCE_EXTENSIONS = (
@@ -365,9 +365,10 @@ Write a clear, beginner-friendly analysis in Markdown with EXACTLY these section
 ## Key Dependencies
 ## Possible Improvements
 """
-        analysis = ask_gemini(
+        analysis = generate_ai(
             prompt,
             system_instruction="You explain code simply for beginners. Use short sentences and Markdown.",
+            max_output_tokens=1200,
         )
 
         return jsonify({

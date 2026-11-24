@@ -107,11 +107,16 @@ async function analyzeRepository() {
   analyzeBtn.disabled = true;
   loader.classList.remove("hidden");
 
+  // Give up after 150s with a clear message instead of spinning forever
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 150000);
+
   try {
     const res = await fetch("/api/analyze", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ url }),
+      signal: controller.signal,
     });
     const data = await readJson(res);
 
@@ -138,8 +143,13 @@ async function analyzeRepository() {
     // Scroll to results
     repoInfoSection.scrollIntoView({ behavior: "smooth" });
   } catch (err) {
-    showError(err.message);
+    if (err.name === "AbortError") {
+      showError("The server took too long to respond. Please try again (the first request after idle can be slow).");
+    } else {
+      showError(err.message);
+    }
   } finally {
+    clearTimeout(timer);
     analyzeBtn.disabled = false;
     loader.classList.add("hidden");
   }
